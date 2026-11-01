@@ -1,5 +1,7 @@
+// Меню в консоли.
 package main
 
+// Ввод с клавиатуры, числа, строки, логика библиотеки, сохранение в файл.
 import (
 	"bufio"
 	"fmt"
@@ -11,8 +13,9 @@ import (
 	"github.com/vovavdovin123-wq/simple-library/storage"
 )
 
+// Показывает меню, пока пользователь не выберет 0.
 func Run(lib *library.Library, dbPath string) {
-	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin) // читать строки из консоли
 
 	for {
 		fmt.Println("\n=== Библиотека ===")
@@ -26,7 +29,7 @@ func Run(lib *library.Library, dbPath string) {
 		fmt.Print("Выбор: ")
 
 		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(input)
+		input = strings.TrimSpace(input) // убрать перевод строки
 		choice, err := strconv.Atoi(input)
 		if err != nil {
 			fmt.Println("Неверный ввод, попробуйте снова.")
@@ -34,7 +37,7 @@ func Run(lib *library.Library, dbPath string) {
 		}
 
 		switch choice {
-		case 1:
+		case 1: // добавить книгу
 			fmt.Print("Название: ")
 			title, _ := reader.ReadString('\n')
 			fmt.Print("Автор: ")
@@ -52,7 +55,7 @@ func Run(lib *library.Library, dbPath string) {
 				fmt.Println("Книга добавлена.")
 			}
 
-		case 2:
+		case 2: // добавить читателя
 			fmt.Print("Имя: ")
 			first, _ := reader.ReadString('\n')
 			fmt.Print("Фамилия: ")
@@ -63,7 +66,7 @@ func Run(lib *library.Library, dbPath string) {
 				fmt.Println("Читатель добавлен.")
 			}
 
-		case 3:
+		case 3: // выдать книгу читателю
 			fmt.Print("ID книги: ")
 			bStr, _ := reader.ReadString('\n')
 			fmt.Print("ID читателя: ")
@@ -76,7 +79,7 @@ func Run(lib *library.Library, dbPath string) {
 				fmt.Println("Книга выдана.")
 			}
 
-		case 4:
+		case 4: // вернуть книгу
 			fmt.Print("ID книги: ")
 			bStr, _ := reader.ReadString('\n')
 			bookID, _ := strconv.Atoi(strings.TrimSpace(bStr))
@@ -86,19 +89,19 @@ func Run(lib *library.Library, dbPath string) {
 				fmt.Println("Книга возвращена.")
 			}
 
-		case 5:
+		case 5: // список книг
 			fmt.Println("--- Книги ---")
 			for _, b := range lib.GetAllBooks() {
 				fmt.Println(" -", b)
 			}
 
-		case 6:
+		case 6: // список читателей
 			fmt.Println("--- Читатели ---")
 			for _, r := range lib.GetAllReaders() {
 				fmt.Println(" -", r)
 			}
 
-		case 0:
+		case 0: // сохранить файл и выйти
 			fmt.Println("Сохранение данных и выход.")
 			if err := storage.SaveLibraryToJSON(dbPath, lib); err != nil {
 				fmt.Println("Произошла ошибка сохранения списка книг:", err)

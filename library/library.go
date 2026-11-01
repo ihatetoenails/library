@@ -1,3 +1,4 @@
+// Правила: добавить, найти, выдать, вернуть.
 package library
 
 import (
@@ -6,14 +7,16 @@ import (
 	"github.com/vovavdovin123-wq/simple-library/domain"
 )
 
+// Списки книг и читателей и последние выданные номера.
 type Library struct {
 	Books   []*domain.Book
 	Readers []*domain.Reader
 
-	lastBookID   int
-	lastReaderID int
+	lastBookID   int // следующий ID книги
+	lastReaderID int // следующий ID читателя
 }
 
+// Пустая библиотека.
 func New() *Library {
 	return &Library{
 		Books:   []*domain.Book{},
@@ -21,11 +24,12 @@ func New() *Library {
 	}
 }
 
+// Добавить книгу, если поля заполнены и такой ещё нет.
 func (lib *Library) AddBook(title, author string, year int) (*domain.Book, error) {
 	if err := validateBook(title, author); err != nil {
 		return nil, err
 	}
-	for _, b := range lib.Books {
+	for _, b := range lib.Books { // проверка дубликата
 		if b.Title == title && b.Author == author {
 			return nil, fmt.Errorf("книга '%s' автора '%s' уже есть в библиотеке", title, author)
 		}
@@ -41,6 +45,7 @@ func (lib *Library) AddBook(title, author string, year int) (*domain.Book, error
 	return book, nil
 }
 
+// Зарегистрировать читателя, если такого имени ещё нет.
 func (lib *Library) AddReader(firstName, lastName string) (*domain.Reader, error) {
 	for _, r := range lib.Readers {
 		if r.FirstName == firstName && r.LastName == lastName {
@@ -58,6 +63,7 @@ func (lib *Library) AddReader(firstName, lastName string) (*domain.Reader, error
 	return reader, nil
 }
 
+// Найти книгу по номеру.
 func (lib *Library) FindBookByID(id int) (*domain.Book, error) {
 	for _, book := range lib.Books {
 		if book.ID == id {
@@ -67,6 +73,7 @@ func (lib *Library) FindBookByID(id int) (*domain.Book, error) {
 	return nil, fmt.Errorf("книга с ID %d не найдена в библиотеке", id)
 }
 
+// Найти читателя по номеру.
 func (lib *Library) FindReaderByID(id int) (*domain.Reader, error) {
 	for _, reader := range lib.Readers {
 		if reader.ID == id {
@@ -76,6 +83,7 @@ func (lib *Library) FindReaderByID(id int) (*domain.Reader, error) {
 	return nil, fmt.Errorf("читатель с ID %d не найден в библиотеке", id)
 }
 
+// Выдать книгу, если оба найдены и читатель активен.
 func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 	book, err := lib.FindBookByID(bookID)
 	if err != nil {
@@ -91,6 +99,7 @@ func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 	return book.IssueBook(readerID)
 }
 
+// Вернуть книгу по номеру.
 func (lib *Library) ReturnBook(bookID int) error {
 	book, err := lib.FindBookByID(bookID)
 	if err != nil {
@@ -99,26 +108,29 @@ func (lib *Library) ReturnBook(bookID int) error {
 	return book.ReturnBook()
 }
 
+// Все книги.
 func (lib *Library) GetAllBooks() []*domain.Book {
 	return lib.Books
 }
 
+// Все читатели.
 func (lib *Library) GetAllReaders() []*domain.Reader {
 	return lib.Readers
 }
 
-// SetBooks / SetReaders — сеттеры для загрузки из storage.
+// Подставить книги после загрузки из файла.
 func (lib *Library) SetBooks(books []*domain.Book) {
 	lib.Books = books
 	lib.UpdateIDs()
 }
 
+// Подставить читателей после загрузки из файла.
 func (lib *Library) SetReaders(readers []*domain.Reader) {
 	lib.Readers = readers
 	lib.UpdateIDs()
 }
 
-// UpdateIDs — пересчитывает lastBookID и lastReaderID после загрузки.
+// Запомнить максимальные ID, чтобы новые не повторялись.
 func (lib *Library) UpdateIDs() {
 	maxBookID := 0
 	for _, book := range lib.Books {
@@ -137,6 +149,7 @@ func (lib *Library) UpdateIDs() {
 	lib.lastReaderID = maxReaderID
 }
 
+// Название и автор не должны быть пустыми.
 func validateBook(title, author string) error {
 	if title == "" {
 		return fmt.Errorf("название книги не может быть пустым")
